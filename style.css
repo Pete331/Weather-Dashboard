@@ -1,0 +1,12 @@
+html,body {
+    height: 100%;
+  }
+
+  #date {
+    font-size: 15px;
+  }
+
+  #weather_image {
+    height: 80px;
+  width: auto;
+  }
