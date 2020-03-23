@@ -31,9 +31,17 @@
       <div class="row">
         <div class="col-3 bg-light ">
           <h2>Search for a City:</h2>
-          <input type="text" placeholder="City" />
+          <input type="text" placeholder="City" id="city-input" />
           <button type="button" class="query_btn btn btn-primary btn-sm">
             Search
+          </button>
+          <div id="error"></div>
+          <h5 class="pt-3">Search History</h5>
+          <div class="pb-3" id="save-location">
+            <button class="d-none new-query-btn"></button>
+          </div>
+          <button type="button" class="clear_btn btn btn-primary btn-sm">
+            Clear
           </button>
         </div>
         <div class="col-9 bg-white">
@@ -45,7 +53,10 @@
               <h4><span id="temperature"></span></h4>
               <h4><span id="humidity"></span></h4>
               <h4><span id="wind-speed"></span></h4>
-              <h4><span id="uv-index"></span><span id="uv-index-value" class="rounded"></span></h4>
+              <h4>
+                <span id="uv-index"></span
+                ><span id="uv-index-value" class="rounded"></span>
+              </h4>
             </div>
           </div>
 

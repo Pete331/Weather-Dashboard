@@ -1,21 +1,36 @@
 $(document).ready(function() {
   var appID = "aa321bbb9feaa55e6def6f01aad2acb8";
+  var storageLocation = 0;
 
-  $(".query_btn").on("click", function() {
-    // removes forecast html and title so that if another location is selected/typed it won't duplicat/show old information
-    $("#forecast").html("");
-    $("#forecast-title").remove();
+  $(".query_btn").on("click", initialize);
+  // had to use this so that the created buttons worked - needed to have a parent associated with the click so that loaded on page load
+  $("body").delegate(".new-query-btn", "click", initialize);
 
-    // gets city name typed into input
-    var query_param = $(this)
-      .prev()
-      .val();
+  getEntries();
+
+  function initialize() {
+    // gets city name typed into input or if not in input on sidebar search history
+    if (
+      $(this)
+        .prev()
+        .val() != ""
+    ) {
+      var query_param = $(this)
+        .prev()
+        .val();
+    } else {
+      var query_param = $(this).text();
+    }
 
     currentWeather(query_param);
-    forcastWeather(query_param);
-  });
+  
+    // clears text input ready for next search
+    $("#city-input").val("");
+  }
 
   function currentWeather(query_param) {
+    // resets error on new search
+    $("#error").text("");
     var weather =
       "http://api.openweathermap.org/data/2.5/weather?q=" +
       query_param +
@@ -24,11 +39,12 @@ $(document).ready(function() {
 
     $.getJSON(weather, function(json) {
       console.log(json);
-
       // gets latitude and longitude for UVindex function
       var lat = json.coord.lat;
       var lon = json.coord.lon;
-
+      // uses city from json rather than the text query so that city starting with capital letter is returned regardless
+      var city = json.name;
+  
       // gets the utc seconds time from JSON and converts to formatted date
       var utcSeconds = json.dt;
       var today = new Date(0);
@@ -56,21 +72,55 @@ $(document).ready(function() {
         "Wind Speed: " + ((json.wind.speed * 1.609).toFixed(1) + "km/h")
       );
       // runs uv index function giving it the lat and long location
-      uvIndex(lat, lon);
+      uvIndex(lat, lon, city);
+    }).fail(function () {
+      // logs error under search box if location 404's
+      $("#error").text("Location not Found").css("color", "red");
     });
   }
 
+  function uvIndex(lat, lon, query_param) {
+    var uv =
+      "http://api.openweathermap.org/data/2.5/uvi?lat=" +
+      lat +
+      "&lon=" +
+      lon +
+      "&APPID=" +
+      appID;
+
+    $.getJSON(uv, function(json) {
+      var uvi = json.value;
+      $("#uv-index").html("UV Index: ");
+      $("#uv-index-value").html("  " + uvi + "  ");
+      if (uvi <= 2.5) {
+        var uvColor = "green";
+      } else if (uvi <= 5.5) {
+        var uvColor = "yellow";
+      } else if (uvi <= 7.5) {
+        var uvColor = "orange";
+      } else {
+        var uvColor = "red";
+      }
+      $("#uv-index-value").css("background-color", uvColor);
+    });
+    forcastWeather(query_param);
+  }
+
   function forcastWeather(query_param) {
+    // removes forecast html and title so that if another location is selected/typed it won't duplicate/show old information
+    $("#forecast").html("");
+    $("#forecast-title").remove();
+
     var forecast =
       "http://api.openweathermap.org/data/2.5/forecast?q=" +
       query_param +
       "&APPID=" +
       appID;
-    console.log(forecast);
+
     $.getJSON(forecast, function(json) {
-      console.log(json);
       $("#forecast").before('<h2 id="forecast-title">5-day Forecast</h2>');
 
+      // loops through creating the 5 boxes for the 5 days of forecast
       for (let i = 0; i < 5; i++) {
         var divTag = $("<div>");
         divTag.attr("class", "bg-primary rounded col-2 m-2");
@@ -105,32 +155,41 @@ $(document).ready(function() {
         $("#forecast").append(divTag);
       }
     });
+    saveQueryParam(query_param);
   }
 
-  function uvIndex(lat, lon) {
-    var uv =
-      "http://api.openweathermap.org/data/2.5/uvi?lat=" +
-      lat +
-      "&lon=" +
-      lon +
-      "&APPID=" +
-      appID;
-
-    $.getJSON(uv, function(json) {
-      console.log(json);
-      var uvi = json.value;
-      $("#uv-index").html("UV Index: ");
-      $("#uv-index-value").html("  " + uvi + "  ");
-      if (uvi <= 2.5) {
-        var uvColor = "green";
-      } else if (uvi <= 5.5) {
-        var uvColor = "yellow";
-      } else if (uvi <= 7.5) {
-        var uvColor = "orange";
-      } else {
-        var uvColor = "red";
+  function saveQueryParam(query_param) {
+    // tries to stop duplicate results being stored in history
+    for (let i = 0; i < localStorage.length; i++) {
+      var location = localStorage.getItem("location" + i);
+        if (query_param === location) {
+        // console.log("We have a duplicate");
+        return;
       }
-      $("#uv-index-value").css("background-color", uvColor);
-    });
+    }
+
+    // sets local storage to search params
+    localStorage.setItem("location" + storageLocation, query_param);
+    var queryBtn = $("<button>").attr("class", "new-query-btn w-100");
+    queryBtn.text(query_param);
+    $("#save-location").append(queryBtn);
+    storageLocation++;
   }
+
+    // gets items stored in local storage and creates the buttons
+  function getEntries() {
+    for (let i = 0; i < localStorage.length; i++) {
+      var location = localStorage.getItem("location" + i);
+      var queryBtn = $("<button>").attr("class", "new-query-btn w-100");
+      queryBtn.text(location);
+      $("#save-location").append(queryBtn);
+      storageLocation = i + 1;
+    }
+  }
+
+  //clears local storage
+  $(".clear_btn").on("click", function() {
+    window.localStorage.clear();
+    window.location.reload();
+  });
 });
