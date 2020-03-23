@@ -39,7 +39,7 @@ $(document).ready(function() {
     // resets error on new search
     $("#error").text("");
     var weather =
-      "http://api.openweathermap.org/data/2.5/weather?q=" +
+      "https://api.openweathermap.org/data/2.5/weather?q=" +
       query_param +
       "&APPID=" +
       appID;
@@ -69,7 +69,7 @@ $(document).ready(function() {
       $("#city").html(json.name);
       $("#weather_image").attr(
         "src",
-        "http://openweathermap.org/img/w/" + json.weather[0].icon + ".png"
+        "https://openweathermap.org/img/w/" + json.weather[0].icon + ".png"
       );
       $("#temperature").html(
         "Temperature: " + ((json.main.temp - 273.15).toFixed(1) + "°C")
@@ -90,7 +90,7 @@ $(document).ready(function() {
 
   function uvIndex(lat, lon, query_param) {
     var uv =
-      "http://api.openweathermap.org/data/2.5/uvi?lat=" +
+      "https://api.openweathermap.org/data/2.5/uvi?lat=" +
       lat +
       "&lon=" +
       lon +
@@ -121,7 +121,7 @@ $(document).ready(function() {
     $("#forecast-title").remove();
 
     var forecast =
-      "http://api.openweathermap.org/data/2.5/forecast?q=" +
+      "https://api.openweathermap.org/data/2.5/forecast?q=" +
       query_param +
       "&APPID=" +
       appID;
@@ -140,7 +140,7 @@ $(document).ready(function() {
         var humidityForecast = json.list[i * 8 + 4].main.humidity + "%";
         var iconForecast = $("<img>").attr(
           "src",
-          "http://openweathermap.org/img/w/" +
+          "https://openweathermap.org/img/w/" +
             json.list[i * 8 + 4].weather[0].icon +
             ".png"
         );
