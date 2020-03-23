@@ -3,6 +3,13 @@ $(document).ready(function() {
   var storageLocation = 0;
 
   $(".query_btn").on("click", initialize);
+// adds enter key press on search
+  $("#city-input").keypress(function(e) {
+    var key = e.which;
+    if (key == 13) {
+      $(".query_btn").click();
+    }
+  });
   // had to use this so that the created buttons worked - needed to have a parent associated with the click so that loaded on page load
   $("body").delegate(".new-query-btn", "click", initialize);
 
@@ -23,7 +30,7 @@ $(document).ready(function() {
     }
 
     currentWeather(query_param);
-  
+
     // clears text input ready for next search
     $("#city-input").val("");
   }
@@ -44,7 +51,7 @@ $(document).ready(function() {
       var lon = json.coord.lon;
       // uses city from json rather than the text query so that city starting with capital letter is returned regardless
       var city = json.name;
-  
+
       // gets the utc seconds time from JSON and converts to formatted date
       var utcSeconds = json.dt;
       var today = new Date(0);
@@ -73,9 +80,11 @@ $(document).ready(function() {
       );
       // runs uv index function giving it the lat and long location
       uvIndex(lat, lon, city);
-    }).fail(function () {
+    }).fail(function() {
       // logs error under search box if location 404's
-      $("#error").text("Location not Found").css("color", "red");
+      $("#error")
+        .text("Location not Found")
+        .css("color", "red");
     });
   }
 
@@ -162,7 +171,7 @@ $(document).ready(function() {
     // tries to stop duplicate results being stored in history
     for (let i = 0; i < localStorage.length; i++) {
       var location = localStorage.getItem("location" + i);
-        if (query_param === location) {
+      if (query_param === location) {
         // console.log("We have a duplicate");
         return;
       }
@@ -176,7 +185,7 @@ $(document).ready(function() {
     storageLocation++;
   }
 
-    // gets items stored in local storage and creates the buttons
+  // gets items stored in local storage and creates the buttons
   function getEntries() {
     for (let i = 0; i < localStorage.length; i++) {
       var location = localStorage.getItem("location" + i);
